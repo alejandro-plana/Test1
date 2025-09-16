@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descargador de Canciones - SpotDL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input[type="url"], select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="url"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .download-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .download-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .download-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        
+        .download-link:hover {
+            background: #218838;
+        }
+        
+        .examples {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .examples h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .examples ul {
+            list-style: none;
+        }
+        
+        .examples li {
+            margin-bottom: 10px;
+            color: #666;
+        }
+        
+        .examples code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Descargador de Canciones</h1>
+            <p>Descarga música de Spotify, YouTube y más usando SpotDL</p>
+        </div>
+        
+        <form id="downloadForm">
+            <div class="form-group">
+                <label for="songUrl">URL de la canción:</label>
+                <input type="url" id="songUrl" name="songUrl" placeholder="https://open.spotify.com/track/..." required>
+            </div>
+            
+            <div class="form-group">
+                <label for="format">Formato de descarga:</label>
+                <select id="format" name="format">
+                    <option value="mp3">MP3 (Recomendado)</option>
+                    <option value="m4a">M4A</option>
+                    <option value="flac">FLAC (Alta calidad)</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="download-btn" id="downloadBtn">
+                Descargar Canción
+            </button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Descargando tu canción...</p>
+        </div>
+        
+        <div class="result" id="result"></div>
+        
+        <div class="examples">
+            <h3>URLs compatibles:</h3>
+            <ul>
+                <li>🎵 <strong>Spotify:</strong> <code>https://open.spotify.com/track/...</code></li>
+                <li>📺 <strong>YouTube:</strong> <code>https://www.youtube.com/watch?v=...</code></li>
+                <li>🎧 <strong>YouTube Music:</strong> <code>https://music.youtube.com/watch?v=...</code></li>
+                <li>🎸 <strong>SoundCloud:</strong> <code>https://soundcloud.com/...</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('downloadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const songUrl = document.getElementById('songUrl').value;
+            const format = document.getElementById('format').value;
+            const downloadBtn = document.getElementById('downloadBtn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            // Reset UI
+            result.style.display = 'none';
+            loading.style.display = 'block';
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = 'Descargando...';
+            
+            try {
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        url: songUrl,
+                        format: format
+                    })
+                });
+                
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (response.ok && data.success) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <strong>¡Descarga exitosa!</strong><br>
+                        Canción: ${data.title || 'Desconocida'}<br>
+                        Artista: ${data.artist || 'Desconocido'}<br>
+                        <a href="${data.downloadUrl}" class="download-link" download>
+                            📥 Descargar archivo
+                        </a>
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `
+                        <strong>Error en la descarga</strong><br>
+                        ${data.error || 'Ocurrió un error inesperado'}
+                    `;
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `
+                    <strong>Error de conexión</strong><br>
+                    No se pudo conectar con el servidor
+                `;
+            }
+            
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = 'Descargar Canción';
+        });
+    </script>
+</body>
+</html>
